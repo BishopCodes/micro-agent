@@ -199,7 +199,7 @@ export const getSimpleCompletion = async function (options: {
     );
     const client = new BedrockRuntimeClient({ region: 'us-east-1' });
     const command = new InvokeModelWithResponseStreamCommand({
-      contentType: 'appllication/json',
+      contentType: 'application/json',
       body: JSON.stringify({
         anthropic_version: 'bedrock-2023-05-31',
         max_tokens: 4096,

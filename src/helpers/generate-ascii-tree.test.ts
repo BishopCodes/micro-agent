@@ -25,7 +25,7 @@ test('generates a tree for files in nested directories', () => {
 });
 
 test('handles an empty list of file paths', () => {
-  const input = [];
+  const input = [] as any[];
   const expectedOutput = '';
   expect(generateAsciiTree(input)).toBe(expectedOutput);
 });

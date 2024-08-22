@@ -8,7 +8,7 @@ export async function iterateOnTestCommand({
   testCommand,
 }: {
   testCommand: string;
-}) {
+}): Promise<string> {
   const result = execaCommand(testCommand).catch((err) => err);
   const final = await result;
   if (isInvalidCommand(final.stderr)) {

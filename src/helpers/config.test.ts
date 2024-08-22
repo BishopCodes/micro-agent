@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => {
     select: vi.fn(),
     text: vi.fn(),
     isCancel: vi.fn(),
-    exit: vi.fn(),
+    exit: vi.fn() as (code?: number | undefined) => never,
   };
 });
 
@@ -49,6 +49,7 @@ describe('getConfig', () => {
     OPENAI_KEY: undefined,
     USE_MOCK_LLM: false,
     MOCK_LLM_RECORD_FILE: undefined,
+    USE_BEDROCK: false, //TODO: Validate
   };
 
   it('should return an object with defaults and the env if no config is provided', async () => {

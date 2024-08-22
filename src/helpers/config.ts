@@ -32,6 +32,9 @@ const configParsers = {
 
     return model;
   },
+  USE_BEDROCK(useBedrock?: string) {
+    return useBedrock === 'true';
+  },
   USE_ASSISTANT(useAssistant?: string) {
     return useAssistant !== 'false';
   },

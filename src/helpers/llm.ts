@@ -15,6 +15,11 @@ import { removeInitialSlash } from './remove-initial-slash';
 import { captureLlmRecord, mockedLlmCompletion } from './mock-llm';
 import { getCodeBlock } from './interactive-mode';
 import Anthropic from '@anthropic-ai/sdk';
+import {
+  BedrockRuntimeClient,
+  InvokeModelCommand,
+  InvokeModelWithResponseStreamCommand,
+} from '@aws-sdk/client-bedrock-runtime';
 
 const defaultModel = 'gpt-4o';
 const assistantIdentifierMetadataKey = '_id';
@@ -99,8 +104,14 @@ export const getFileSuggestion = async function (
 
     `,
   };
-  const { MODEL: model } = await getConfig();
+  const { MODEL: model, USE_BEDROCK: useBedrock } = await getConfig();
+
+  // if (useBedrock) {
+  //  // TODO: Add Bedrock implementation
+  // }
+
   if (
+    useBedrock ||
     useOllama(model) ||
     useAnthropic(model) ||
     !supportsFunctionCalling(model)
@@ -120,6 +131,7 @@ export const getFileSuggestion = async function (
       )
     );
   }
+
   const openai = await getOpenAi();
   const completion = await openai.chat.completions.create({
     model: model || defaultModel,
@@ -173,10 +185,52 @@ export const getSimpleCompletion = async function (options: {
     MODEL: model,
     MOCK_LLM_RECORD_FILE: mockLlmRecordFile,
     USE_MOCK_LLM: useMockLlm,
+    USE_BEDROCK: useBedrock,
   } = await getConfig();
 
   if (useMockLlm) {
     return mockedLlmCompletion(mockLlmRecordFile, options.messages);
+  }
+
+  if (useBedrock) {
+    //TODO: Clean up config and abstract a bit more
+    const systemMessage = options.messages.find(
+      (message) => message.role === 'system'
+    );
+    const client = new BedrockRuntimeClient({ region: 'us-east-1' });
+    const command = new InvokeModelWithResponseStreamCommand({
+      contentType: 'appllication/json',
+      body: JSON.stringify({
+        anthropic_version: 'bedrock-2023-05-31',
+        max_tokens: 4096,
+        system: systemMessage?.content,
+        messages: options.messages.filter(
+          (message) => message.role !== 'system'
+        ),
+      }),
+      modelId: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
+    });
+
+    const apiResponse = await client.send(command);
+
+    let output = '';
+    const responseBody = (apiResponse && apiResponse.body) || {
+      async *[Symbol.asyncIterator]() {},
+    };
+
+    for await (const item of responseBody) {
+      const chunk = JSON.parse(new TextDecoder().decode(item.chunk?.bytes));
+      const chunkType = chunk.type;
+
+      if (chunkType === 'content_block_delta') {
+        output += chunk.delta.text;
+        if (options.onChunk) {
+          options.onChunk(chunk.delta.text);
+        }
+      }
+    }
+    captureLlmRecord(options.messages, output, mockLlmRecordFile);
+    return output;
   }
 
   if (useAnthropic(model)) {
@@ -263,9 +317,23 @@ export const getCompletion = async function (options: {
     USE_MOCK_LLM: useMockLlm,
     OPENAI_API_ENDPOINT: endpoint,
     USE_ASSISTANT,
+    USE_BEDROCK: useBedrock,
   } = await getConfig();
   if (useMockLlm) {
     return mockedLlmCompletion(mockLlmRecordFile, options.messages);
+  }
+
+  // TODO: Cleanup duplications
+  if (useBedrock) {
+    process.stdout.write(formatMessage('\n'));
+    const output = await getSimpleCompletion({
+      messages: options.messages,
+      onChunk: (chunk) => {
+        process.stderr.write(formatMessage(chunk));
+      },
+    });
+    process.stdout.write(formatMessage('\n'));
+    return output;
   }
 
   const useModel = model || defaultModel;

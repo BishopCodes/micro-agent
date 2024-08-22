@@ -5,6 +5,7 @@
   "type": "module",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.21.1",
+    "@aws-sdk/client-bedrock-runtime": "^3.635.0",
     "@clack/core": "latest",
     "@clack/prompts": "latest",
     "@commitlint/cli": "^19.3.0",

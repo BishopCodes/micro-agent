@@ -49,7 +49,7 @@ describe('getConfig', () => {
     OPENAI_KEY: undefined,
     USE_MOCK_LLM: false,
     MOCK_LLM_RECORD_FILE: undefined,
-    USE_BEDROCK: false, //TODO: Validate
+    USE_BEDROCK: false,
   };
 
   it('should return an object with defaults and the env if no config is provided', async () => {

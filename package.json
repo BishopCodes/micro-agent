@@ -1,7 +1,7 @@
 {
-  "name": "@builder.io/micro-agent",
-  "description": "An AI CLI that writes code for you.",
-  "version": "0.1.5",
+  "name": "@BishopCodes/micro-agent",
+  "description": "An AI CLI that writes code for you. Forked from https://github.com/BuilderIO/micro-agent",
+  "version": "0.1.5-beta",
   "type": "module",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.21.1",
@@ -28,7 +28,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/BuilderIO/micro-agent"
+    "url": "https://github.com/BishopCodes/micro-agent"
   },
   "files": [
     "dist"

@@ -7,7 +7,7 @@
 </div>
 
 <p align="center">
-   An AI agent that writes and fixes code for you.
+   An AI agent that writes and fixes code for you. Forked from <a href="https://github.com/BuilderIO/micro-agent">https://github.com/BuilderIO/micro-agent</a>
 </p>
 
 <p align="center">
